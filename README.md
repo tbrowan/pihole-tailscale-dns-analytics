@@ -1,6 +1,6 @@
 # Pi-hole + Tailscale DNS Analytics
 
-[![tests](https://github.com/tbrowan/pihole-tailcale-dns-analytics/actions/workflows/tests.yml/badge.svg)](https://github.com/tbrowan/pihole-tailcale-dns-analytics/actions/workflows/tests.yml)
+[![tests](https://github.com/tbrowan/pihole-tailscale-dns-analytics/actions/workflows/tests.yml/badge.svg)](https://github.com/tbrowan/pihole-tailscale-dns-analytics/actions/workflows/tests.yml)
 
 A self-hosted analytics pipeline for my home network's DNS. A Raspberry Pi 3 B+ runs
 [Pi-hole](https://pi-hole.net/) as the ad-blocking DNS server for all my devices over
