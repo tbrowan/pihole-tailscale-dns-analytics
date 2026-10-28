@@ -1,0 +1,19 @@
+# systemd user service: starts the dashboard at boot and restarts it if it crashes.
+# Install on the Pi (no sudo needed; "linger" is on, so it runs without a login):
+#   systemctl --user enable --now ~/pihole-stats/dashboard/pihole-dashboard.service
+# Status / logs:
+#   systemctl --user status pihole-dashboard
+#   journalctl --user -u pihole-dashboard -f
+
+[Unit]
+Description=Pi-hole stats dashboard (Flask on 127.0.0.1:5000)
+
+[Service]
+# %h = your home folder
+WorkingDirectory=%h/pihole-stats
+ExecStart=%h/pihole-stats/venv/bin/python dashboard/app.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

@@ -9,7 +9,8 @@ Reads the same ../.env file as the collector (DB_HOST, DB_USER, DB_PASSWORD,
 DB_NAME). The database user only needs SELECT, so the dashboard can never
 change your data.
 
-Run (from ~/pihole-stats):
+On the Pi it runs as a systemd user service (see pihole-dashboard.service).
+To run it by hand instead (from ~/pihole-stats):
     venv/bin/python dashboard/app.py
 Then on your Mac (local port 5001 because macOS AirPlay Receiver owns 5000):
     ssh -L 5001:127.0.0.1:5000 pi     (keep that window open)
