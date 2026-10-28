@@ -22,12 +22,16 @@ from decimal import Decimal
 
 import mysql.connector
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request, send_from_directory
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, "..", ".env"))
 
-app = Flask(__name__)
+# The front end is plain files in client/: index.html plus resources/styles and
+# resources/scripts. Flask serves them as-is, so there is no build step.
+CLIENT_DIR = os.path.join(BASE_DIR, "client")
+app = Flask(__name__, static_folder=os.path.join(CLIENT_DIR, "resources"),
+            static_url_path="/resources")
 
 
 def query(sql: str, params: tuple = ()) -> list[dict]:
@@ -70,13 +74,27 @@ def days_param() -> int:
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return send_from_directory(CLIENT_DIR, "index.html")
 
 
 @app.route("/api/latest")
 def latest():
-    rows = query("SELECT * FROM snapshots ORDER BY taken_at DESC LIMIT 1")
-    return jsonify(rows[0] if rows else {})
+    # The database computes the age so the browser's clock or timezone can't skew it.
+    rows = query(
+        """SELECT *, TIMESTAMPDIFF(MINUTE, taken_at, NOW()) AS age_minutes
+           FROM snapshots ORDER BY taken_at DESC LIMIT 1"""
+    )
+    if not rows:
+        return jsonify({})
+    # The rolling-24h totals from one day earlier (with an hour of slack for cron
+    # timing). Comparing two separate 24h windows is valid; summing them is not.
+    prev = query(
+        """SELECT * FROM snapshots
+           WHERE taken_at <= (SELECT MAX(taken_at) FROM snapshots) - INTERVAL 1 DAY
+             AND taken_at >  (SELECT MAX(taken_at) FROM snapshots) - INTERVAL 25 HOUR
+           ORDER BY taken_at DESC LIMIT 1"""
+    )
+    return jsonify({**rows[0], "day_before": prev[0] if prev else None})
 
 
 @app.route("/api/history")

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pi-hole Analytics</title>
+  <link rel="stylesheet" href="resources/styles/main.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="resources/scripts/app.js" defer></script>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Pi-hole Analytics</h1>
+      <div class="sub" id="updated">Loading…</div>
+    </div>
+    <label class="sub">Range
+      <select id="range">
+        <option value="1">Last 24 hours</option>
+        <option value="7" selected>Last 7 days</option>
+        <option value="30">Last 30 days</option>
+      </select>
+    </label>
+  </header>
+
+  <div class="banner" id="stale" role="alert" hidden></div>
+
+  <section class="tiles">
+    <div class="tile" id="t-total"><div class="label">Queries (24h)</div><div class="value">–</div><div class="delta"></div></div>
+    <div class="tile" id="t-blocked"><div class="label">Blocked (24h)</div><div class="value">–</div><div class="delta"></div></div>
+    <div class="tile" id="t-pct"><div class="label">Percent blocked</div><div class="value">–</div><div class="delta"></div></div>
+    <div class="tile" id="t-clients"><div class="label">Active clients</div><div class="value">–</div><div class="delta"></div></div>
+    <div class="tile" id="t-unique"><div class="label">Unique domains (24h)</div><div class="value">–</div><div class="delta"></div></div>
+    <div class="tile" id="t-gravity"><div class="label">Domains on blocklists</div><div class="value">–</div><div class="delta"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Percent of queries blocked</h2>
+    <p>Each point is one hourly snapshot of Pi-hole's rolling 24-hour totals.</p>
+    <div class="chart"><canvas id="pctChart"></canvas></div>
+  </section>
+
+  <section class="card">
+    <h2>DNS queries (rolling 24 hours)</h2>
+    <p>Total and blocked lookups across all devices on the tailnet.</p>
+    <div class="chart"><canvas id="volChart"></canvas></div>
+  </section>
+
+  <section class="card">
+    <h2>Most persistent blocked domains</h2>
+    <p id="persist-note">How many hourly snapshots each domain appeared in the top-10 blocked list.</p>
+    <div class="chart tall"><canvas id="topChart"></canvas></div>
+  </section>
+
+  <section class="card">
+    <h2>Blocked domains table</h2>
+    <p>Click a column heading to sort.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="domain" aria-sort="none"><button type="button">Domain</button></th>
+            <th data-key="snapshots_seen" class="num" aria-sort="descending"><button type="button">In top 10</button></th>
+            <th data-key="peak_hits" class="num" aria-sort="none"><button type="button">Peak hits (24h)</button></th>
+          </tr>
+        </thead>
+        <tbody id="domain-rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>
