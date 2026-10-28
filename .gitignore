@@ -6,6 +6,7 @@ venv/
 
 # Runtime output 
 collector.log
+dashboard.log
 __pycache__/
 
 # macOS Finder metadata
