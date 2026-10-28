@@ -8,3 +8,5 @@ venv/
 collector.log
 __pycache__/
 
+# macOS Finder metadata
+.DS_Store
