@@ -43,6 +43,7 @@ function baseOptions(extra = {}) {
 
 async function getJSON(url) {
   const r = await fetch(url);
+  if (r.status === 404) throw new Error(`${url} returned 404. Open the page through the SSH tunnel (Flask), not Live Server.`);
   if (!r.ok) throw new Error(`${url} returned ${r.status}`);
   return r.json();
 }

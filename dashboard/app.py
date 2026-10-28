@@ -11,9 +11,11 @@ change your data.
 
 Run (from ~/pihole-stats):
     venv/bin/python dashboard/app.py
-Then on your Mac:
-    ssh -L 5000:127.0.0.1:5000 pi     (keep that window open)
-    open http://localhost:5000
+Then on your Mac (local port 5001 because macOS AirPlay Receiver owns 5000):
+    ssh -L 5001:127.0.0.1:5000 pi     (keep that window open)
+    open http://localhost:5001
+Open it through the tunnel, not VS Code Live Server: Live Server only serves
+files, so every /api/... request gets a 404.
 """
 
 import os
@@ -86,13 +88,14 @@ def latest():
     )
     if not rows:
         return jsonify({})
-    # The rolling-24h totals from one day earlier (with an hour of slack for cron
-    # timing). Comparing two separate 24h windows is valid; summing them is not.
+    # The snapshot closest to 24h before the latest (cron drifts by seconds, so
+    # search +/- 1 hour). Comparing two separate 24h windows is valid; summing is not.
     prev = query(
-        """SELECT * FROM snapshots
-           WHERE taken_at <= (SELECT MAX(taken_at) FROM snapshots) - INTERVAL 1 DAY
-             AND taken_at >  (SELECT MAX(taken_at) FROM snapshots) - INTERVAL 25 HOUR
-           ORDER BY taken_at DESC LIMIT 1"""
+        """SELECT s.* FROM snapshots AS s
+           CROSS JOIN (SELECT MAX(taken_at) - INTERVAL 1 DAY AS target FROM snapshots) AS t
+           WHERE s.taken_at BETWEEN t.target - INTERVAL 1 HOUR AND t.target + INTERVAL 1 HOUR
+           ORDER BY ABS(TIMESTAMPDIFF(SECOND, s.taken_at, t.target))
+           LIMIT 1"""
     )
     return jsonify({**rows[0], "day_before": prev[0] if prev else None})
 
